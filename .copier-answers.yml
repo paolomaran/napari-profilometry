@@ -1,0 +1,19 @@
+# Changes here will be overwritten by Copier; NEVER EDIT MANUALLY
+_commit: v2.1.2
+_src_path: https://github.com/napari/napari-plugin-template
+display_name: Profilometry processor
+email: paolo.maran@polimi.it
+full_name: Paolo Maran
+github_repository_url: https://github.com/paolomaran/napari-profilometry
+github_username_or_organization: paolomaran
+include_reader_plugin: true
+include_sample_data_plugin: false
+include_widget_plugin: true
+include_writer_plugin: true
+install_dependabot: true
+install_precommit: true
+license: MIT
+module_name: napari_profilometry
+plugin_name: napari-profilometry
+short_description: Napari plugin for extracting and unwrapping phase from Fringe Projection
+    Profilometry images.
