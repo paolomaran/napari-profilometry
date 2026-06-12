@@ -1,7 +1,7 @@
 name: napari-profilometry
 display_name: Profilometry processor
 # use 'hidden' to remove plugin from napari hub search results
-visibility: public
+visibility: hidden
 # see https://napari.org/stable/plugins/technical_references/manifest.html#fields for valid categories
 # categories: []
 contributions:
