@@ -13,13 +13,13 @@ from enum import Enum
 import os
 from qtpy.QtWidgets import  QWidget
 import pathlib
-from ._get_h5_data import get_h5_dataset, get_h5_attr, get_datasets_index_by_name, get_group_name
-from .unwrap_processors.PUMA_unwrap import unwrap_phase_puma
-from .unwrap_processors.PUMA_multiprocessing_unwrap import multiPUMA_unwrap_processor
-from .unwrap_processors.SCIKIT_unwrap import unwrap_phase_scikit
-from .unwrap_processors.SCIKIT_multiprocessing_unwrap import multiSCIKIT_unwrap_processor
-from .unwrap_processors.obtain_wrapped_phase_from_fringes import obtain_wrapped_phase
-from .unwrap_processors.stack_force_continuity import force_continuity_stack
+from napari_profilometry._get_h5_data import get_h5_dataset, get_h5_attr, get_datasets_index_by_name, get_group_name
+from napari_profilometry.unwrap_processors.PUMA_unwrap import unwrap_phase_puma
+from napari_profilometry.unwrap_processors.PUMA_multiprocessing_unwrap import multiPUMA_unwrap_processor
+from napari_profilometry.unwrap_processors.SCIKIT_unwrap import unwrap_phase_scikit
+from napari_profilometry.unwrap_processors.SCIKIT_multiprocessing_unwrap import multiSCIKIT_unwrap_processor
+from napari_profilometry.unwrap_processors.obtain_wrapped_phase_from_fringes import obtain_wrapped_phase
+from napari_profilometry.unwrap_processors.stack_force_continuity import force_continuity_stack
  
 
 def find_max(img):
@@ -28,6 +28,64 @@ def find_max(img):
 def find_nearest(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
+
+class UnwrapMethod(Enum):
+    SCIKIT = 1
+    PUMA = 2
+
+
+@magic_factory(call_button = 'Reshape stack')
+def reshape_stack_widget(
+    viewer: Viewer,
+    image: Image,
+    old_order: str = 'tpyx',
+    new_order: str = 'ptyx'
+):
+    pass
+
+
+@magic_factory(call_button = 'Get wrapped phase')
+def get_wrapped_phases_widget(
+    viewer: Viewer,
+    image: Image,
+    
+):
+    data = image.data
+    if len(data.shape)!=3:
+        raise ValueError(f'Image must be of shape (sp,sy,sx), but this image does not have three dimensions (has {len(data.shape)})')
+    
+    wrapped = obtain_wrapped_phase(image=data)
+    viewer.add_image(wrapped,colormap='twilight_shifted')
+    return wrapped
+
+
+@magic_factory(call_button = 'Unwrap single image')
+def unwrap_single_image_widget(
+    viewer: Viewer,
+    image: Image,
+
+    calib: Image = None,
+    height_conversion: float = 1.0,
+    unwrapping_method: UnwrapMethod = UnwrapMethod.SCIKIT,
+    apply_height_conversion: bool = False,
+):
+    pass
+
+
+@magic_factory(call_button = 'Unwrap stack')
+def unwrap_stack_widget(
+    viewer: Viewer,
+    image: Image,
+
+    calib: Image = None,
+    height_conversion: float = 1.0,
+    unwrapping_method: UnwrapMethod = UnwrapMethod.SCIKIT,
+    max_threads_no: int = 1,
+    roi: Shapes = None,
+    apply_height_conversion: bool = False,
+    force_continuity: bool = False
+):
+    pass
 
 
 class H5opener(QWidget):

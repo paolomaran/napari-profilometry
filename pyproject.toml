@@ -35,6 +35,8 @@ dependencies = [
     "qtpy",
     "scikit-image",
     "maxflow",
+    "os",
+    "pathlib"
 ]
 
 [project.optional-dependencies]

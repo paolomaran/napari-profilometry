@@ -6,51 +6,24 @@ visibility: hidden
 # categories: []
 contributions:
   commands:
-    - id: napari-profilometry.get_reader
-      python_name: napari_profilometry._reader:napari_get_reader
-      title: Open data with Profilometry processor
-    - id: napari-profilometry.write_multiple
-      python_name: napari_profilometry._writer:write_multiple
-      title: Save multi-layer data with Profilometry processor
-    - id: napari-profilometry.write_single_image
-      python_name: napari_profilometry._writer:write_single_image
-      title: Save image data with Profilometry processor
-    - id: napari-profilometry.make_container_widget
-      python_name: napari_profilometry:ImageThreshold
-      title: Make threshold Container widget
-    - id: napari-profilometry.make_magic_widget
-      python_name: napari_profilometry:threshold_magic_widget
-      title: Make threshold magic widget
-    - id: napari-profilometry.make_function_widget
-      python_name: napari_profilometry:threshold_autogenerate_widget
-      title: Make threshold function widget
-    - id: napari-profilometry.make_qwidget
-      python_name: napari_profilometry:ExampleQWidget
-      title: Make example QWidget
-  readers:
-    - command: napari-profilometry.get_reader
-      accepts_directories: false
-      filename_patterns: ['*.npy']
-  writers:
-    - command: napari-profilometry.write_multiple
-      layer_types: ['image*','labels*']
-      filename_extensions: []
-    - command: napari-profilometry.write_single_image
-      layer_types: ['image']
-      filename_extensions: ['.npy']
+    - id: napari-profilometry.make_reshape_widget
+      python_name: napari_profilometry._profilometry_widget:reshape_stack_widget
+      title: Make reshape stack widget
+    - id: napari-profilometry.make_wrapped_phase_widget
+      python_name: napari_profilometry._profilometry_widget:get_wrapped_phase_widget
+      title: Make extract wrapped phase widget
+    - id: napari-profilometry.make_unwrap_single_image_widget
+      python_name: napari_profilometry._profilometry_widget:unwrap_single_image_widget
+      title: Make unwrap single image widget
+    - id: napari-profilometry.make_unwrap_stack_widget
+      python_name: napari_profilometry._profilometry_widget:unwrap_stack_widget
+      title: Make unwrap stack widget
   widgets:
-    - command: napari-profilometry.make_container_widget
-      display_name: Container Threshold
-    - command: napari-profilometry.make_magic_widget
-      display_name: Magic Threshold
-    - command: napari-profilometry.make_function_widget
-      autogenerate: true
-      display_name: Autogenerate Threshold
-    - command: napari-profilometry.make_qwidget
-      display_name: Example QWidget
-  menus:
-    napari/layers/segment:
-      - command: napari-profilometry.make_container_widget
-      - command: napari-profilometry.make_magic_widget
-      - command: napari-profilometry.make_function_widget
-      - command: napari-profilometry.make_qwidget
+    - display_name: Reshape stack
+      command: napari_profilometry._profilometry_widget.reshape_stack_widget
+    - display_name: Extract wrapped phase
+      command: napari_profilometry._profilometry_widget.get_wrapped_phase_widget
+    - display_name: Unwrap single image
+      command: napari_profilometry._profilometry_widget.unwrap_single_image_widget
+    - display_name: Unwrap stack
+      command: napari_profilometry._profilometry_widget.unwrap_stack_widget
