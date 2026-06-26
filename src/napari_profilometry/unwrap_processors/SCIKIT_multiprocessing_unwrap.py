@@ -1,26 +1,14 @@
-'''
-Script for Phase Unwrapping via Max-flow/Min-cut (PUMA) a stack of images.
-Reference: Bioucas-Dias and Valadão, IEEE TRANSACTIONS ON IMAGE PROCESSING, VOL. 16, NO. 3, MARCH 2007.
-
-Due to the large computational cost of unwrapping images with PUMA,
-a multiprocessing approach is used. In this way, image processing is 
-parallelized without needing GPU usage.
-
-Authors: Anik Ghosh, Politecnico di Milano; Paolo Maran, Politecnico di Milano
-'''
+import skimage.restoration as scikit
 import numpy as np
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import freeze_support, cpu_count
 from itertools import repeat
-from .PUMA_unwrap import funcPUMA as unwrap_single_image  # noqa: N813
 
 
-def _unwrap_phase_puma_single(wrapped_phase,calib_phase=None,img_index: int = -1, img_total: int = -1):
-
-    uw_img = unwrap_single_image(wrapped_phase)
+def _unwrap_phase_scikit_single(wrapped_phase,calib_phase: None,img_index: int=-1, img_total: int=-1):
+    uw_img = scikit.unwrap_phase(wrapped_phase)
     if calib_phase is not None:
         uw_img = uw_img - calib_phase
-
 
     if img_index != -1 and img_total != -1:
         print(f'[{(100*(img_index+1)/img_total):.2f}% processed]')
@@ -28,7 +16,7 @@ def _unwrap_phase_puma_single(wrapped_phase,calib_phase=None,img_index: int = -1
     return uw_img
 
 
-def multiPUMA_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib: np.ndarray = None):  # noqa: N802
+def multiSCIKIT_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib: np.ndarray = None):  # noqa: N802
     '''
     Processor that, given an image stack of wrapped phase maps,
     unwraps each image using the PUMA algorithm.
@@ -41,12 +29,12 @@ def multiPUMA_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib
         The image array containing the wrapped phase.
         Must be ordered as (z, y, x).
         Element type must be float.
-    max_threads: int, Optional
+    max_threads: int
         Number of maximum threads used in multiprocessing.
         Must be an integer greater than zero and smaller than the maximum
         number of threads available on the current machine. 
         If undefined, defaults to half of the maximum available threads.
-    calib: ndarray (sy,sx), Optional
+    calib: ndarray (sy,sx)
         Plane calibration. This will be subtracted from all images in stack.
         Therefore, it must have the same shape (in y and x) as stack.
     
@@ -102,7 +90,7 @@ def multiPUMA_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib
     idxs = range(sz)
     freeze_support()
     with ProcessPoolExecutor(max_workers=max_threads) as pool:
-        uw_stack = list(pool.map(_unwrap_phase_puma_single,stack,repeat(calib),idxs,repeat(sz)))
+        uw_stack = list(pool.map(_unwrap_phase_scikit_single,stack,repeat(calib),idxs,repeat(sz)))
 
     return uw_stack
 
