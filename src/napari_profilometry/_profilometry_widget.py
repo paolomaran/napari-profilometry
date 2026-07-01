@@ -33,15 +33,62 @@ class UnwrapMethod(Enum):
     SCIKIT = 1
     PUMA = 2
 
+class OrderDimsStack(Enum):
+    tpyx = 1
+    ptyx = 2
+    pyxt = 3
+    tyxp = 4
+    yxpt = 5
+    yxtp = 6
+    Fyx = 7 
 
-@magic_factory(call_button = 'Reshape stack')
+
+# TODO a reshape widget from yxp to pyx might also be needed
+@magic_factory(call_button = 'Reshape to 4D stack')
 def reshape_stack_widget(
     viewer: Viewer,
     image: Image,
-    old_order: str = 'tpyx',
-    new_order: str = 'ptyx'
+    old_order: OrderDimsStack = OrderDimsStack.ptyx,
+    phases: int = 3,
+    time_points: int = 48
 ):
-    pass
+    if old_order == OrderDimsStack.tpyx:
+        print('WARNING: Order is already correct!!')
+        return
+    else:
+        stack = image.data
+        if len(stack.shape) != 4  and old_order != OrderDimsStack.Fyx:
+            raise ValueError(f'Stack must have 4 dimensions for normal reshaping, instead has {len(stack.shape)}')
+        if len(stack.shape) != 3  and old_order == OrderDimsStack.Fyx:
+            raise ValueError(f'Stack must have 3 dimensions for frames to time+phase reshaping, instead has {len(stack.shape)}')
+
+        # target order is tpyx
+        if old_order == OrderDimsStack.ptyx:
+            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,0,2,3])
+        elif old_order == OrderDimsStack.pyxt:
+            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,2,3,0])
+        elif old_order == OrderDimsStack.tyxp:
+            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[0,2,3,1])    
+        elif old_order == OrderDimsStack.yxpt:
+            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,1,0])
+        elif old_order == OrderDimsStack.yxtp:
+            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,0,1])
+        elif old_order == OrderDimsStack.Fyx:
+            (sf,sy,sx) = stack.shape
+            if sf != phases*time_points:
+                raise ValueError(f'Number of frames must be equal to number of phases times number of time points; total frames = {sf}, phases*times = {phases*time_points}')
+            stack_reshaped = np.reshape(stack,(time_points,phases,sy,sx))
+        else:
+            raise RuntimeError(f'Invalid order code selected: {old_order}')
+
+        old_name = image.name        
+        image.data = stack_reshaped
+        image.name = 'RESHAPED_'+old_name
+        viewer.dims.axis_labels = ['time', 'phase', 'y', 'x']
+        
+        # viewer.add_image(data=stack_reshaped,name = image.name + '_reshaped')
+        return stack_reshaped
+     
 
 
 @magic_factory(call_button = 'Get wrapped phase')
