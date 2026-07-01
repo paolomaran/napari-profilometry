@@ -34,7 +34,7 @@ dependencies = [
     "magicgui",
     "qtpy",
     "scikit-image",
-    "maxflow",
+    "PyMaxFlow",
     "os",
     "pathlib",
     "h5py"
