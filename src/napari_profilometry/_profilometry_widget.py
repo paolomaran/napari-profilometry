@@ -1,7 +1,7 @@
 '''
 Script containing the source code of the various widgets implemented by this plugin.
 
-Author: Paolo Maran (Politecnico di Milano)
+Author: Paolo Maran, Andrea Bassi (Politecnico di Milano)
 '''
 import numpy as np
 from magicgui import magic_factory, magicgui
@@ -106,7 +106,8 @@ def get_wrapped_phases_widget(
     
     if len(data.shape) == 4:
         (t,_,_,_) = data.shape
-        wrapped = np.empty_like(data,dtype = np.float64)
+        wrapped = np.empty_like(data[:,0,:,:],dtype = np.float64)
+        print(wrapped.shape)
         for time in range(t):
             wrapped[time] = obtain_wrapped_phase(data[time])
     
@@ -119,29 +120,85 @@ def get_wrapped_phases_widget(
 def unwrap_single_image_widget(
     viewer: Viewer,
     image: Image,
-
     calib: Image = None,
     height_conversion: float = 1.0,
     unwrapping_method: UnwrapMethod = UnwrapMethod.SCIKIT,
     apply_height_conversion: bool = False,
 ):
-    pass
+    #TODO: threading
+    stack = image.data
+    calib_data = calib.data if calib is not None else None
+
+    if len(stack.shape) > 2:
+        raise RuntimeError('Image must be bidimensional, phase-wrapped data.')
+    
+    if unwrapping_method == UnwrapMethod.SCIKIT:
+        uw_stack = unwrap_phase_scikit(
+            stack,
+            calib=calib_data)
+    elif unwrapping_method == UnwrapMethod.PUMA:
+        uw_stack = unwrap_phase_puma(
+            stack,
+            calib=calib_data)
+        
+    if apply_height_conversion:
+        uw_stack = uw_stack * height_conversion
+
+    viewer.add_image(uw_stack,name = 'UW_'+image.name,colormap = 'gray')
+    return uw_stack    
 
 
 @magic_factory(call_button = 'Unwrap stack')
 def unwrap_stack_widget(
     viewer: Viewer,
     image: Image,
-
     calib: Image = None,
-    height_conversion: float = 1.0,
+    height_conversion: float = 0.442,
     unwrapping_method: UnwrapMethod = UnwrapMethod.SCIKIT,
     max_threads_no: int = 1,
-    roi: Shapes = None,
     apply_height_conversion: bool = False,
-    force_continuity: bool = False
+    force_continuity: bool = False,
+    roi_continuity: Shapes = None,
 ):
-    pass
+    #TODO threading !!!!!!!!
+
+    stack = image.data
+    calib_data = calib.data if calib is not None else None
+
+    (st,sy,sx) = stack.shape
+
+    if unwrapping_method == UnwrapMethod.SCIKIT:
+        uw_stack = multiSCIKIT_unwrap_processor(
+            stack,
+            max_threads=max_threads_no, 
+            calib=calib_data)
+    elif unwrapping_method == UnwrapMethod.PUMA:
+        uw_stack = multiPUMA_unwrap_processor(
+            stack,
+            max_threads=max_threads_no, 
+            calib=calib_data)
+
+    if force_continuity:
+        if roi_continuity is not None:
+            ymin = int(np.min(roi_continuity.data[0][...,-2]))
+            ymax = int(np.max(roi_continuity.data[0][...,-2]))
+            xmin = int(np.min(roi_continuity.data[0][...,-1]))
+            xmax = int(np.max(roi_continuity.data[0][...,-1]))
+        else:
+            ymin = 0
+            ymax = sy-1
+            xmin = 0
+            xmax = sx-1
+        uw_stack = force_continuity_stack(
+            uw_stack,
+            (ymin,ymax,xmin,xmax),
+            set_zero_first_image = True)
+    
+    if apply_height_conversion:
+        uw_stack = uw_stack * height_conversion
+
+    viewer.add_image(uw_stack,name = 'UW_'+image.name,colormap = 'gray')
+    return uw_stack
 
 
 class H5opener(QWidget):

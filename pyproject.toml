@@ -36,7 +36,8 @@ dependencies = [
     "scikit-image",
     "maxflow",
     "os",
-    "pathlib"
+    "pathlib",
+    "h5py"
 ]
 
 [project.optional-dependencies]

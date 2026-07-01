@@ -104,6 +104,7 @@ def multiPUMA_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib
     with ProcessPoolExecutor(max_workers=max_threads) as pool:
         uw_stack = list(pool.map(_unwrap_phase_puma_single,stack,repeat(calib),idxs,repeat(sz)))
 
+    uw_stack = np.asarray(uw_stack)
     return uw_stack
 
             

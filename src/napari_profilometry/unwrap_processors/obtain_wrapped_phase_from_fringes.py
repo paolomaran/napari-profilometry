@@ -38,10 +38,10 @@ def obtain_wrapped_phase(image:np.ndarray):
         raise ValueError(f'There must be at least three images of fringes, instead {sp} were given.')
 
     image = image.astype(np.float64)
-    _phase = np.zeros_like(image,dtype = np.float64)
+    _phase = np.zeros_like(image[0],dtype=np.complex128)
+    
         
     for i in range(sp):
         _phase += image[i]*np.exp(+1j*i*2*np.pi/sp)
     wrapped_phase = np.angle(_phase)
-
     return wrapped_phase
