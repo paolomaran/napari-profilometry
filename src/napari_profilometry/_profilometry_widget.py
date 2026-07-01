@@ -52,42 +52,42 @@ def reshape_stack_widget(
     phases: int = 3,
     time_points: int = 48
 ):
-    if old_order == OrderDimsStack.tpyx:
+    
+    stack = image.data
+    if len(stack.shape) != 4  and old_order != OrderDimsStack.Fyx:
+        raise ValueError(f'Stack must have 4 dimensions for normal reshaping, instead has {len(stack.shape)}')
+    if len(stack.shape) != 3  and old_order == OrderDimsStack.Fyx:
+        raise ValueError(f'Stack must have 3 dimensions for frames to time+phase reshaping, instead has {len(stack.shape)}')
+
+    # target order is tpyx
+    if old_order == OrderDimsStack.ptyx:
+        stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,0,2,3])
+    elif old_order == OrderDimsStack.pyxt:
+        stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,2,3,0])
+    elif old_order == OrderDimsStack.tyxp:
+        stack_reshaped = np.moveaxis(stack,[0,1,2,3],[0,2,3,1])    
+    elif old_order == OrderDimsStack.yxpt:
+        stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,1,0])
+    elif old_order == OrderDimsStack.yxtp:
+        stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,0,1])
+    elif old_order == OrderDimsStack.Fyx:
+        (sf,sy,sx) = stack.shape
+        if sf != phases*time_points:
+            raise ValueError(f'Number of frames must be equal to number of phases times number of time points; total frames = {sf}, phases*times = {phases*time_points}')
+        stack_reshaped = np.reshape(stack,(time_points,phases,sy,sx))
+    elif old_order == OrderDimsStack.tpyx:
         print('WARNING: Order is already correct!!')
-        return
+        stack_reshaped = stack
     else:
-        stack = image.data
-        if len(stack.shape) != 4  and old_order != OrderDimsStack.Fyx:
-            raise ValueError(f'Stack must have 4 dimensions for normal reshaping, instead has {len(stack.shape)}')
-        if len(stack.shape) != 3  and old_order == OrderDimsStack.Fyx:
-            raise ValueError(f'Stack must have 3 dimensions for frames to time+phase reshaping, instead has {len(stack.shape)}')
+        raise RuntimeError(f'Invalid order code selected: {old_order}')
 
-        # target order is tpyx
-        if old_order == OrderDimsStack.ptyx:
-            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,0,2,3])
-        elif old_order == OrderDimsStack.pyxt:
-            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,2,3,0])
-        elif old_order == OrderDimsStack.tyxp:
-            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[0,2,3,1])    
-        elif old_order == OrderDimsStack.yxpt:
-            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,1,0])
-        elif old_order == OrderDimsStack.yxtp:
-            stack_reshaped = np.moveaxis(stack,[0,1,2,3],[2,3,0,1])
-        elif old_order == OrderDimsStack.Fyx:
-            (sf,sy,sx) = stack.shape
-            if sf != phases*time_points:
-                raise ValueError(f'Number of frames must be equal to number of phases times number of time points; total frames = {sf}, phases*times = {phases*time_points}')
-            stack_reshaped = np.reshape(stack,(time_points,phases,sy,sx))
-        else:
-            raise RuntimeError(f'Invalid order code selected: {old_order}')
-
-        old_name = image.name        
-        image.data = stack_reshaped
-        image.name = 'RESHAPED_'+old_name
-        viewer.dims.axis_labels = ['time', 'phase', 'y', 'x']
-        
-        # viewer.add_image(data=stack_reshaped,name = image.name + '_reshaped')
-        return stack_reshaped
+    old_name = image.name        
+    image.data = stack_reshaped
+    image.name = 'RESHAPED_'+old_name
+    viewer.dims.axis_labels = ['time', 'phase', 'y', 'x']
+    
+    # viewer.add_image(data=stack_reshaped,name = image.name + '_reshaped')
+    return stack_reshaped
      
 
 
@@ -95,15 +95,24 @@ def reshape_stack_widget(
 def get_wrapped_phases_widget(
     viewer: Viewer,
     image: Image,
-    
 ):
+    #TODO: threading
     data = image.data
-    if len(data.shape)!=3:
-        raise ValueError(f'Image must be of shape (sp,sy,sx), but this image does not have three dimensions (has {len(data.shape)})')
+    if len(data.shape) != 3 and len(data.shape) != 4:
+        raise ValueError(f'Image must be of shape (sp,sy,sx) or (t,sp,sy,sx), but this image is not (has {len(data.shape)} dimensions)')
     
-    wrapped = obtain_wrapped_phase(image=data)
-    viewer.add_image(wrapped,colormap='twilight_shifted')
+    if len(data.shape) == 3:
+        wrapped = obtain_wrapped_phase(image=data)
+    
+    if len(data.shape) == 4:
+        (t,_,_,_) = data.shape
+        wrapped = np.empty_like(data,dtype = np.float64)
+        for time in range(t):
+            wrapped[time] = obtain_wrapped_phase(data[time])
+    
+    viewer.add_image(wrapped,name = 'WR_PHASE_'+image.name,colormap='twilight_shifted')
     return wrapped
+            
 
 
 @magic_factory(call_button = 'Unwrap single image')
