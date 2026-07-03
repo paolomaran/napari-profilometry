@@ -35,8 +35,6 @@ dependencies = [
     "qtpy",
     "scikit-image",
     "PyMaxFlow",
-    "os",
-    "pathlib",
     "h5py"
 ]
 
