@@ -7,8 +7,8 @@ import numpy as np
 from magicgui import magic_factory, magicgui
 from napari import Viewer
 from napari.layers import Image, Shapes
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
+# import matplotlib.pyplot as plt
+# from matplotlib.patches import Circle
 from enum import Enum
 import os
 from qtpy.QtWidgets import  QWidget
