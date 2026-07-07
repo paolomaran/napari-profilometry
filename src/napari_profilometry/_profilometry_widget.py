@@ -40,7 +40,8 @@ class OrderDimsStack(Enum):
     tyxp = 4
     yxpt = 5
     yxtp = 6
-    Fyx = 7 
+    Fyx = 7
+    yxp = 8
 
 
 # TODO a reshape widget from yxp to pyx might also be needed
@@ -52,13 +53,27 @@ def reshape_stack_widget(
     phases: int = 3,
     time_points: int = 48
 ):
+    valid_orders_4d = [ OrderDimsStack.ptyx,
+                        OrderDimsStack.tpyx,
+                        OrderDimsStack.pyxt,
+                        OrderDimsStack.tyxp,
+                        OrderDimsStack.yxpt,
+                        OrderDimsStack.yxtp]
+    
+    valid_orders_3d = [ OrderDimsStack.Fyx,
+                        OrderDimsStack.yxp]
     
     stack = image.data
-    if len(stack.shape) != 4  and old_order != OrderDimsStack.Fyx:
-        raise ValueError(f'Stack must have 4 dimensions for normal reshaping, instead has {len(stack.shape)}')
-    if len(stack.shape) != 3  and old_order == OrderDimsStack.Fyx:
-        raise ValueError(f'Stack must have 3 dimensions for frames to time+phase reshaping, instead has {len(stack.shape)}')
 
+    if old_order in valid_orders_4d:
+        if len(stack.shape) != 4:
+            raise ValueError(f'Stack must have 4 dimensions for selected reshaping, instead has {len(stack.shape)}')
+    elif old_order in valid_orders_3d:
+        if len(stack.shape) != 3:
+            raise ValueError(f'Stack must have 3 dimensions for selected reshaping, instead has {len(stack.shape)}')
+    else:
+        raise ValueError('Unknown or unrecognized reshape order')
+    
     # target order is tpyx
     if old_order == OrderDimsStack.ptyx:
         stack_reshaped = np.moveaxis(stack,[0,1,2,3],[1,0,2,3])
@@ -75,6 +90,8 @@ def reshape_stack_widget(
         if sf != phases*time_points:
             raise ValueError(f'Number of frames must be equal to number of phases times number of time points; total frames = {sf}, phases*times = {phases*time_points}')
         stack_reshaped = np.reshape(stack,(time_points,phases,sy,sx))
+    elif old_order == OrderDimsStack.yxp:
+        stack_reshaped = np.moveaxis(stack,[0,1,2],[2,0,1])
     elif old_order == OrderDimsStack.tpyx:
         print('WARNING: Order is already correct!!')
         stack_reshaped = stack
