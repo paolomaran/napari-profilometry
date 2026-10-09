@@ -146,7 +146,7 @@ def get_wrapped_phases_widget(
     this_widget = _active_thread_workers['get_wrapped_phase']  # the real FunctionGui
     
     def _on_done(wr_phase):
-        viewer.add_image(wr_phase,name = 'WR_PHASE_'+image.name,colormap='twilight_shifted')
+        viewer.add_image(wr_phase,name = 'WR_PHASE_'+image.name,colormap='twilight_shifted',rgb=False)
         this_widget.call_button.enabled = True
         return wr_phase
     
@@ -196,7 +196,7 @@ def unwrap_single_image_widget(
         if apply_height_conversion:
             uw_stack = uw_stack * height_conversion
         uw_stack = uw_stack[np.newaxis,np.newaxis,:,:]
-        viewer.add_image(uw_stack,name = 'UW_'+image.name,colormap = 'gray')
+        viewer.add_image(uw_stack,name = 'UW_'+image.name,colormap = 'gray',rgb=False)
         this_widget.call_button.enabled = True
         return uw_stack  
     
@@ -270,7 +270,7 @@ def unwrap_stack_widget(
         if apply_height_conversion:
             uw_stack = uw_stack * height_conversion
 
-        viewer.add_image(uw_stack[:,np.newaxis,:,:],name = 'UW_'+image.name,colormap = 'gray')
+        viewer.add_image(uw_stack[:,np.newaxis,:,:],name = 'UW_'+image.name,colormap = 'gray',rgb=False)
         this_widget.call_button.enabled = True
         return uw_stack
 
@@ -331,7 +331,8 @@ class H5opener(QWidget):
             layer = self.viewer.add_image(image_values,
                                             name = im_name,
                                             scale = scale,
-                                            colormap = colormap)
+                                            colormap = colormap,
+                                            rgb=False)
         self.center_stack(image_values)
         if kwargs.get('autoscale') is True:
             layer.reset_contrast_limits()
