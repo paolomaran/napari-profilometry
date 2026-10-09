@@ -96,8 +96,6 @@ def reshape_stack_widget(
         if sf != phases*time_points:
             raise ValueError(f'Number of frames must be equal to number of phases times number of time points; total frames = {sf}, phases*times = {phases*time_points}')
         stack_reshaped = np.reshape(stack,(time_points,phases,sy,sx))
-    elif old_order == OrderDimsStack.yxp:
-        stack_reshaped = np.moveaxis(stack,[0,1,2],[2,0,1])
     elif old_order == OrderDimsStack.tpyx:
         print('WARNING: Order is already correct!!')
         stack_reshaped = stack
