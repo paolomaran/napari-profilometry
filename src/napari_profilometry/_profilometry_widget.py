@@ -103,8 +103,12 @@ def reshape_stack_widget(
         raise RuntimeError(f'Invalid order code selected: {old_order}')
 
     old_name = image.name        
-    image.data = stack_reshaped
-    image.name = 'RESHAPED_'+old_name
+    if stack_reshaped.ndim != image.ndim:
+        viewer.layers.remove(image)
+        image = viewer.add_image(stack_reshaped,name='RESHAPED_'+old_name,rgb=False)
+    else:
+        image.data = stack_reshaped
+        image.name = 'RESHAPED_'+old_name
     viewer.dims.axis_labels = ['time', 'phase', 'y', 'x']
     
     # viewer.add_image(data=stack_reshaped,name = image.name + '_reshaped')
