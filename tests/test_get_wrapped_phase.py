@@ -14,7 +14,7 @@ def test_get_wrapped_phase_single_img(make_napari_viewer,qtbot):
     import numpy as np
 
     viewer = make_napari_viewer()
-    data = np.load("samples/ex_single_image.npy")
+    data = np.load("samples/ex_single_image_small.npy")
     image = viewer.add_image(data,rgb=False)
     widget_reshape = reshape_stack_widget()
     widget_wrap_phase = get_wrapped_phases_widget()
