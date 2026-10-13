@@ -48,7 +48,6 @@ class OrderDimsStack(Enum):
     yxpt = 5
     yxtp = 6
     Fyx = 7
-    yxp = 8
 
 
 @magic_factory(call_button = 'Reshape to 4D stack')
@@ -66,8 +65,7 @@ def reshape_stack_widget(
                         OrderDimsStack.yxpt,
                         OrderDimsStack.yxtp]
     
-    valid_orders_3d = [ OrderDimsStack.Fyx,
-                        OrderDimsStack.yxp]
+    valid_orders_3d = [ OrderDimsStack.Fyx ]
     
     stack = image.data
 
@@ -100,7 +98,7 @@ def reshape_stack_widget(
         print('WARNING: Order is already correct!!')
         stack_reshaped = stack
     else:
-        raise RuntimeError(f'Invalid order code selected: {old_order}')
+        raise RuntimeError(f'Unimplemented order selected: {old_order}')
 
     old_name = image.name        
     if stack_reshaped.ndim != image.ndim:

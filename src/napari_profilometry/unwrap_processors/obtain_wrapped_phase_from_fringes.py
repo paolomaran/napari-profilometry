@@ -16,7 +16,7 @@ def obtain_wrapped_phase(image:np.ndarray):
 
     Parameters
     ----------
-    wrapped_phase: ndarray (sp x sy x sx)
+    image: ndarray (sp x sy x sx)
         The image stack containing the frignes images
         Must be ordered as sp,sy,sx, and must have exactly 3 dimensions.
         There must be at least 3 fringes images.
@@ -29,7 +29,7 @@ def obtain_wrapped_phase(image:np.ndarray):
     
     # Input check: check that image is of correct type and shape
     if type(image) is not np.ndarray:
-        raise TypeError(f'Image must be a numpy.ndarray, is instead {type(wrapped_phase)}')
+        raise TypeError(f'Image must be a numpy.ndarray, is instead {type(image)}')
     ndims = len(np.shape(image))
     if  ndims != 3:
         raise ValueError(f'Image must have exactly three dimensions, has instead {ndims}')

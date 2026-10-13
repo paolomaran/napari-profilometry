@@ -1,5 +1,51 @@
 
 from napari_profilometry._profilometry_widget import get_wrapped_phases_widget, reshape_stack_widget, OrderDimsStack
+from napari_profilometry.unwrap_processors.obtain_wrapped_phase_from_fringes import obtain_wrapped_phase
+import pytest
+
+
+def test_wrapped_phase_invalid_dimensions():
+    '''
+    Tests that wrapped phase retrieval rejects images
+    that do not have exactly three dimensions.
+    '''
+    import numpy as np
+
+    data = np.zeros((16,16))
+
+    with pytest.raises(ValueError,match="exactly three dimensions"):
+        obtain_wrapped_phase(data)
+
+
+def test_wrapped_phase_insufficient_phases():
+    '''
+    Tests that wrapped phase retrieval requires
+    at least three phase-shifted images.
+    '''
+    import numpy as np
+
+    data = np.zeros((2,16,16))
+
+    with pytest.raises(ValueError,match="at least three images"):
+        obtain_wrapped_phase(data)
+
+
+
+def test_wrapped_phase_constant_signal():
+    '''
+    Tests phase retrieval using three synthetic phase-shifted
+    images with a known phase.
+    '''
+    import numpy as np
+
+    phase = 0.5
+    data = np.array([10+5*np.cos(phase+2*np.pi*i/3) for i in range(3)])
+    data = np.broadcast_to(data[:,np.newaxis,np.newaxis],(3,16,16))
+
+    result = obtain_wrapped_phase(data)
+
+    assert result.shape == (16,16)
+    np.testing.assert_allclose(result,phase,atol=1e-10)
 
 
 def test_get_wrapped_phase_single_img(make_napari_viewer,qtbot):
