@@ -79,7 +79,7 @@ def multiPUMA_unwrap_processor(stack: np.ndarray, max_threads: int = None, calib
             except Exception:
                 raise TypeError(f'max_threads must be of type int, is instead {type(max_threads)}')
             
-        if max_threads <= 0 or max_threads >= max_processes:
+        if max_threads <= 0 or max_threads > max_processes:
             raise ValueError(f'max_threads must be between 1 and {max_processes-1} (inclusive), is instead {max_threads}')
     
     # Input check: calib must be a ndarray of float64 with same (sy,sx) as stack

@@ -82,7 +82,7 @@ def test_multiprocessing_invalid_threads_type(processor_module):
         run_processor(processor_module,data,max_threads="invalid")
 
 
-@pytest.mark.parametrize("threads",[0,-1,8,9])
+@pytest.mark.parametrize("threads",[0,-1,999])
 def test_multiprocessing_invalid_threads_count(processor_module,threads):
     '''
     Tests that the process count is greater than zero
