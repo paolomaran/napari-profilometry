@@ -55,3 +55,33 @@ def test_continuity_zero_first_image():
 
     assert np.isclose(np.mean(result[0]),0.0)
     assert result.shape == data.shape
+
+
+def test_continuity_positive_jump():
+    '''
+    Tests that continuity correction removes a positive
+    discontinuity of 4pi between consecutive images.
+    '''
+
+    data = np.zeros((3,16,16))
+    data[1] = 4*np.pi
+    data[2] = 8*np.pi
+
+    result = force_continuity_stack(data,(0,16,0,16))
+
+    np.testing.assert_allclose(result,np.zeros_like(data),atol=1e-10)
+
+
+def test_continuity_negative_jump():
+    '''
+    Tests that continuity correction removes a negative
+    discontinuity of 4pi between consecutive images.
+    '''
+
+    data = np.zeros((3,16,16))
+    data[1] = -4*np.pi
+    data[2] = -8*np.pi
+
+    result = force_continuity_stack(data,(0,16,0,16))
+
+    np.testing.assert_allclose(result,np.zeros_like(data),atol=1e-10)
