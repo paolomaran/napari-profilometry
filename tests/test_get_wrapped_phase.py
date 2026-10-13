@@ -39,7 +39,7 @@ def test_wrapped_phase_constant_signal():
     import numpy as np
 
     phase = 0.5
-    data = np.array([10+5*np.cos(phase+2*np.pi*i/3) for i in range(3)])
+    data = np.array([10+5*np.cos(phase-2*np.pi*i/3) for i in range(3)])
     data = np.broadcast_to(data[:,np.newaxis,np.newaxis],(3,16,16))
 
     result = obtain_wrapped_phase(data)
