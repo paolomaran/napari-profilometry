@@ -3,7 +3,7 @@
 from napari_profilometry._profilometry_widget import unwrap_stack_widget, get_wrapped_phases_widget, reshape_stack_widget, OrderDimsStack, UnwrapMethod
 
 
-def test_unwrap_single_image_scikit(make_napari_viewer,qtbot):
+def test_unwrap_stack_scikit(make_napari_viewer,qtbot):
     '''
     This test ensures that the unwrap_single_image widget works via scikit.
     No meaningful tests are made on the image; this test ensures that the
@@ -35,7 +35,7 @@ def test_unwrap_single_image_scikit(make_napari_viewer,qtbot):
     assert result.shape == wrapped_image.data.shape
 
 
-def test_unwrap_single_image_puma(make_napari_viewer,qtbot):
+def test_unwrap_stack_puma(make_napari_viewer,qtbot):
     '''
     This test ensures that the unwrap_single_image widget works via puma.
     No meaningful tests are made on the image; this test ensures that the

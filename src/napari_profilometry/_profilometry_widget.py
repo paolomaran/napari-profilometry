@@ -164,9 +164,7 @@ def get_wrapped_phases_widget(
     worker.start()    
             
 
-
-@thread_worker
-def _tw_unwrap_single_image(stack,calib_data,unwrap_method):
+def _unwrap_single_image(stack,calib_data,unwrap_method):
     if unwrap_method == UnwrapMethod.SCIKIT:
         uw_stack = unwrap_phase_scikit(
             stack,
@@ -175,8 +173,12 @@ def _tw_unwrap_single_image(stack,calib_data,unwrap_method):
         uw_stack = unwrap_phase_puma(
             stack,
             calib=calib_data)
-        
     return uw_stack
+
+
+@thread_worker
+def _tw_unwrap_single_image(stack,calib_data,unwrap_method):
+    return _unwrap_single_image(stack,calib_data,unwrap_method)
 
 
 
@@ -217,19 +219,17 @@ def unwrap_single_image_widget(
 
 
 
+def _unwrap_stack(stack,max_threads_no,calib_data,unwrap_method):
+    if unwrap_method == UnwrapMethod.SCIKIT:
+        uw_stack = multiSCIKIT_unwrap_processor(stack,max_threads=max_threads_no,calib=calib_data)
+    elif unwrap_method == UnwrapMethod.PUMA:
+        uw_stack = multiPUMA_unwrap_processor(stack,max_threads=max_threads_no,calib=calib_data)
+    return uw_stack
+
+
 @thread_worker
 def _tw_unwrap_stack(stack,max_threads_no,calib_data,unwrap_method):
-    if unwrap_method == UnwrapMethod.SCIKIT:
-        uw_stack = multiSCIKIT_unwrap_processor(
-            stack,
-            max_threads=max_threads_no, 
-            calib=calib_data)
-    elif unwrap_method == UnwrapMethod.PUMA:
-        uw_stack = multiPUMA_unwrap_processor(
-            stack,
-            max_threads=max_threads_no, 
-            calib=calib_data)
-    return uw_stack
+    return _unwrap_stack(stack,max_threads_no,calib_data,unwrap_method)
 
 
 def _tw_continuity_forcer(uw_stack,roi,set_zero):
