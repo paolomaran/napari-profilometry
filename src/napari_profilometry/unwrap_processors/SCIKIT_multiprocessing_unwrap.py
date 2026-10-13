@@ -59,7 +59,7 @@ def multiSCIKIT_unwrap_processor(stack: np.ndarray, max_threads: int = None, cal
     # Input check: max_threads must be an int between 1 and maximum available threads
     max_processes = cpu_count()
     if max_threads is None:
-        max_threads = int(max_processes/2)
+        max_threads = max(int(max_processes/2))
     else:
         if type(max_threads) is not int:
             try:
