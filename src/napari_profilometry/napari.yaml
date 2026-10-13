@@ -1,6 +1,6 @@
 name: napari-profilometry
 display_name: Profilometry processor
-visibility: hidden
+visibility: public
 
 contributions:
   commands:
